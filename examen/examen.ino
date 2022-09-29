@@ -1,58 +1,77 @@
-#include <SPI.h>
-#include <MFRC522.h>
+//{*librerias y variables para el sensor de temperatura
+// Incluimos librería
+#include <DHT.h>
+ // Definimos el pin digital donde se conecta el sensor
+#define DHTPIN 2
+// Dependiendo del tipo de sensor
+#define DHTTYPE DHT11
+// Inicializamos el sensor DHT11
+DHT dht(DHTPIN, DHTTYPE);
+//*}
 
-#define RST_PIN  9    //Pin 9 para el reset del RC522
-#define SS_PIN  10   //Pin 10 para el SS (SDA) del RC522
-MFRC522 mfrc522(SS_PIN, RST_PIN); ///Creamos el objeto para el RC522
+//{* variables de ldr
+int lectura = 0;
+//}
 
-void setup() {
-  Serial.begin(9600); //Iniciamos La comunicacion serial
-  SPI.begin();        //Iniciamos el Bus SPI
-  mfrc522.PCD_Init(); // Iniciamos el MFRC522
-  Serial.println("Control de acceso:");
-}
+//{*
+const int PIRPin= 3;
+//}
 
-byte ActualUID[4]; //almacenará el código del Tag leído
-byte Usuario1[4]= {0x4D, 0x5C, 0x6A, 0x45} ; //código del usuario 1
-byte Usuario2[4]= {0xC1, 0x2F, 0xD6, 0x0E} ; //código del usuario 2
-void loop() {
-  // Revisamos si hay nuevas tarjetas  presentes
-  if ( mfrc522.PICC_IsNewCardPresent()) 
-        {  
-      //Seleccionamos una tarjeta
-            if ( mfrc522.PICC_ReadCardSerial()) 
-            {
-                  // Enviamos serialemente su UID
-                  Serial.print(F("Card UID:"));
-                  for (byte i = 0; i < mfrc522.uid.size; i++) {
-                          Serial.print(mfrc522.uid.uidByte[i] < 0x10 ? " 0" : " ");
-                          Serial.print(mfrc522.uid.uidByte[i], HEX);   
-                          ActualUID[i]=mfrc522.uid.uidByte[i];          
-                  } 
-                  Serial.print("     ");                 
-                  //comparamos los UID para determinar si es uno de nuestros usuarios  
-                  if(compareArray(ActualUID,Usuario1))
-                    Serial.println("Acceso concedido...");
-                  else if(compareArray(ActualUID,Usuario2))
-                    Serial.println("Acceso concedido...");
-                  else
-                    Serial.println("Acceso denegado...");
-                  
-                  // Terminamos la lectura de la tarjeta tarjeta  actual
-                  mfrc522.PICC_HaltA();
-          
-            }
-      
+void temperatura(){
+  // Esperamos 5 segundos entre medidas
+  delay(5000);
+  // Leemos la humedad relativa
+  float h = dht.readHumidity();
+  // Leemos la temperatura en grados centígrados (por defecto)
+  float t = dht.readTemperature();
+  // Comprobamos si ha habido algún error en la lectura
+  if (isnan(h) || isnan(t)) {
+    Serial.println("Error obteniendo los datos del sensor DHT11");
+    return;
   }
-  
-}
+  // Calcular el índice de calor en grados centígrados
+  float hic = dht.computeHeatIndex(t, h, false);
+  //impresion de datos
+  Serial.print("Temperatura: ");
+  Serial.print(t);
+  Serial.print(" *C ");
+  Serial.print("\n"); 
+  }
 
-//Función para comparar dos vectores
- boolean compareArray(byte array1[],byte array2[])
-{
-  if(array1[0] != array2[0])return(false);
-  if(array1[1] != array2[1])return(false);
-  if(array1[2] != array2[2])return(false);
-  if(array1[3] != array2[3])return(false);
-  return(true);
+void ldr(){
+  lectura = analogRead(0); 
+  Serial.println(lectura);
+  delay(500);
+    }
+
+void pir(){
+  int value= digitalRead(PIRPin);
+  
+  if (value == HIGH){
+    Serial.println("movimiento detectado");
+    delay(3000);
+    }else{
+    Serial.println("sin movimiento");
+    delay(3000);
+    }
+  
+  }
+
+
+
+ 
+void setup() {
+// Inicializamos comunicación serie
+  Serial.begin(9600);
+// Comenzamos el sensor DHT
+  dht.begin();
+//iniciar pir
+  pinMode(PIRPin, INPUT);
+ 
+}
+ 
+void loop() {
+ temperatura();
+ ldr();
+ pir();
 }
