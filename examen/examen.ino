@@ -13,8 +13,13 @@ DHT dht(DHTPIN, DHTTYPE);
 int lectura = 0;
 //}
 
-//{*
+//{* variables para pir
 const int PIRPin= 3;
+//}
+
+//{*librerias y variables para servo Motor
+#include <Servo.h>
+Servo servoMotor;
 //}
 
 void temperatura(){
@@ -57,8 +62,22 @@ void pir(){
   
   }
 
-
-
+void motor(){
+    // Desplazamos a la posición 0º
+  servoMotor.write(0);
+  // Esperamos 1 segundo
+  delay(1000);
+  
+  // Desplazamos a la posición 90º
+  servoMotor.write(90);
+  // Esperamos 1 segundo
+  delay(1000);
+  
+  // Desplazamos a la posición 180º
+  servoMotor.write(180);
+  // Esperamos 1 segundo
+  delay(1000);
+  }
  
 void setup() {
 // Inicializamos comunicación serie
@@ -67,6 +86,8 @@ void setup() {
   dht.begin();
 //iniciar pir
   pinMode(PIRPin, INPUT);
+
+  servoMotor.attach(8);
  
 }
  
