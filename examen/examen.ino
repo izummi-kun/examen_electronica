@@ -22,6 +22,12 @@ const int PIRPin= 3;
 Servo servoMotor;
 //}
 
+//{*variables del sensor ultrasonico
+const int Trigger = 7;   //Pin digital 2 para el Trigger del sensor
+const int Echo = 6;   //Pin digital 3 para el Echo del sensor
+//}
+
+
 void temperatura(){
   // Esperamos 5 segundos entre medidas
   delay(5000);
@@ -78,6 +84,25 @@ void motor(){
   // Esperamos 1 segundo
   delay(1000);
   }
+
+void ultrasonico(){
+  
+  long t; 
+  long d; 
+
+  digitalWrite(Trigger, HIGH);
+  delayMicroseconds(10);  
+  digitalWrite(Trigger, LOW);
+  
+  t = pulseIn(Echo, HIGH); 
+  d = t/59;             
+  
+  Serial.print("Distancia: ");
+  Serial.print(d);      
+  Serial.print("cm");
+  Serial.println();
+  delay(800);  
+  }
  
 void setup() {
 // Inicializamos comunicación serie
@@ -86,8 +111,10 @@ void setup() {
   dht.begin();
 //iniciar pir
   pinMode(PIRPin, INPUT);
-
   servoMotor.attach(8);
+  pinMode(Trigger, OUTPUT); //pin como salida
+  pinMode(Echo, INPUT);  //pin como entrada
+  digitalWrite(Trigger, LOW);//Inicializamos el pin con 0
  
 }
  
@@ -95,4 +122,5 @@ void loop() {
  temperatura();
  ldr();
  pir();
+ ultrasonico();
 }
