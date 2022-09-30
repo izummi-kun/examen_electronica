@@ -27,6 +27,9 @@ const int Trigger = 7;   //Pin digital 2 para el Trigger del sensor
 const int Echo = 6;   //Pin digital 3 para el Echo del sensor
 //}
 
+//variables y librerias de lector de targeta
+#include <SPI.h>
+#include <MFRC522.h>
 
 void temperatura(){
   // Esperamos 5 segundos entre medidas
@@ -119,8 +122,5 @@ void setup() {
 }
  
 void loop() {
- temperatura();
- ldr();
- pir();
- ultrasonico();
+
 }
